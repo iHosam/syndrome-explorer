@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syndrome Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .card-hover {
+            transition: all 0.2s ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 antialiased min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- Header -->
+    <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10 shadow-sm transition-colors duration-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-start sm:items-center justify-between flex-col sm:flex-row gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2" id="ui-title">
+                        <i class="fa-solid fa-brain text-brand-500"></i> Syndrome Explorer
+                    </h1>
+                    <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm sm:text-base" id="ui-subtitle">Discover and understand fascinating psychological and physical syndromes.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors" title="Toggle Theme">
+                        <i class="fa-solid fa-moon dark:hidden"></i>
+                        <i class="fa-solid fa-sun hidden dark:block"></i>
+                    </button>
+                    <button onclick="toggleLanguage()" class="px-4 py-2 rounded-full font-medium bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 hover:bg-brand-100 dark:hover:bg-brand-900/50 transition-colors border border-brand-200 dark:border-brand-800" id="ui-lang-btn">
+                        عربي
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="mt-6 relative max-w-3xl">
+                <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-search text-slate-400 text-lg"></i>
+                </div>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="block w-full ps-12 pe-4 py-4 border border-slate-300 dark:border-slate-600 rounded-2xl leading-5 bg-slate-50 dark:bg-slate-900/50 placeholder-slate-400 dark:placeholder-slate-500 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-slate-800 focus:border-brand-500 sm:text-lg transition-all duration-200 shadow-inner" 
+                    placeholder="Search by name, symptoms, or context (e.g., 'going with bad guy')..."
+                >
+                <div class="absolute inset-y-0 end-0 pe-4 flex items-center">
+                    <button id="clearSearch" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hidden transition-colors">
+                        <i class="fa-solid fa-times-circle text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="mt-6 flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar" id="filterContainer">
+                <!-- Filters will be injected here by JS -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <!-- Results Info -->
+        <div class="flex justify-between items-end mb-6">
+            <h2 class="text-xl font-semibold text-slate-700 dark:text-slate-300" id="resultsCount">Loading...</h2>
+        </div>
+
+        <!-- Grid -->
+        <div id="syndromeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Cards will be injected here by JS -->
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-center">
+            <div class="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6 transition-colors">
+                <i class="fa-solid fa-magnifying-glass text-4xl text-slate-400 dark:text-slate-500"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-700 dark:text-slate-200 mb-2" id="ui-empty-title">No syndromes found</h3>
+            <p class="text-slate-500 dark:text-slate-400 max-w-md" id="ui-empty-desc">We couldn't find anything matching your search criteria. Try using different keywords or clearing your filters.</p>
+            <button onclick="clearSearch()" class="mt-6 px-6 py-2 bg-brand-500 text-white rounded-full font-medium hover:bg-brand-600 transition-colors" id="ui-clear-btn">
+                Clear Search
+            </button>
+        </div>
+    </main>
+
+    <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 text-center text-slate-500 dark:text-slate-400 text-sm transition-colors duration-200">
+        <p id="ui-footer">Information provided is for educational purposes and is not medical advice.</p>
+    </footer>
+
+    <script>
+        // The Database: Rich objects with tags for contextual searching
+        const syndromesDatabase = [
+            {
+                name: "Stockholm Syndrome",
+                category: "Psychological",
+                description: "A psychological response where hostages or abuse victims develop an emotional bond with their captors or abusers.",
+                tags: ["hostage", "kidnapping", "bad guy", "captor", "love", "sympathy", "abuse", "trauma bonding", "survival"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Lima Syndrome",
+                category: "Psychological",
+                description: "The exact opposite of Stockholm syndrome; a situation where abductors develop sympathy for their hostages.",
+                tags: ["captor", "sympathy", "hostage", "guilt", "kidnapper caring", "opposite of stockholm"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Paris Syndrome",
+                category: "Psychosomatic",
+                description: "A sense of disappointment exhibited by some individuals when visiting Paris, feeling that the city was not what they had expected, sometimes leading to hallucinations and anxiety.",
+                tags: ["travel", "disappointment", "tourist", "france", "shock", "unmet expectations", "vacation"],
+                color: "bg-pink-100 text-pink-700 border-pink-200"
+            },
+            {
+                name: "Jerusalem Syndrome",
+                category: "Psychological",
+                description: "A group of mental phenomena involving the presence of either religiously themed obsessive ideas, delusions or other psychosis-like experiences that are triggered by a visit to the city of Jerusalem.",
+                tags: ["religion", "holy", "delusion", "messiah", "psychosis", "travel", "israel", "prophet"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Capgras Delusion",
+                category: "Neurological",
+                description: "An irrational belief that a familiar person or place has been replaced with an exact duplicate or imposter.",
+                tags: ["imposter", "fake", "replaced", "family", "alien", "doppelganger", "clone", "stranger"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Fregoli Delusion",
+                category: "Neurological",
+                description: "A rare disorder in which a person holds a delusional belief that different people are in fact a single person who changes appearance or is in disguise.",
+                tags: ["disguise", "same person", "stalker", "persecution", "shapeshifter", "paranoia"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Cotard's Syndrome",
+                category: "Neurological",
+                description: "Also known as walking corpse syndrome; a rare mental illness in which the affected person holds the delusional belief that they are already dead, do not exist, are putrefying, or have lost their blood or internal organs.",
+                tags: ["dead", "undead", "missing organs", "zombie", "flesh", "decay", "nihilism", "ghost"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Alice in Wonderland Syndrome",
+                category: "Neurological",
+                description: "A neuropsychological condition that causes a distortion of perception. People may experience micropsia, macropsia, pelopsia, or teleopsia (things appearing too small, too large, too close, or too far).",
+                tags: ["size", "shrinking", "growing", "perception", "hallucination", "macropsia", "micropsia", "fantasy", "giant", "tiny"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Alien Hand Syndrome",
+                category: "Neurological",
+                description: "A rare neurological condition in which a person experiences their limbs acting seemingly on their own, without control over the actions.",
+                tags: ["rogue limb", "uncontrollable", "hand", "brain surgery", "possessed", "split brain", "involuntary"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Stendhal Syndrome",
+                category: "Psychosomatic",
+                description: "A psychosomatic condition involving rapid heartbeat, fainting, confusion and even hallucinations, allegedly occurring when individuals become exposed to objects or phenomena of great beauty.",
+                tags: ["art", "beauty", "fainting", "museum", "overwhelm", "florence", "masterpiece", "panic"],
+                color: "bg-pink-100 text-pink-700 border-pink-200"
+            },
+            {
+                name: "Munchausen Syndrome",
+                category: "Behavioral",
+                description: "A factitious disorder wherein those affected feign disease, illness, or psychological trauma to draw attention, sympathy, or reassurance to themselves.",
+                tags: ["fake illness", "attention", "hospital", "lying", "faking it", "sympathy", "doctor shopping"],
+                color: "bg-orange-100 text-orange-700 border-orange-200"
+            },
+            {
+                name: "Exploding Head Syndrome",
+                category: "Sleep Disorder",
+                description: "A condition in which a person experiences unreal noises that are loud and of short duration when falling asleep or waking up.",
+                tags: ["sleep", "noise", "bomb", "waking up", "bang", "gunshot", "hallucination", "night", "insomnia"],
+                color: "bg-indigo-100 text-indigo-700 border-indigo-200"
+            },
+            {
+                name: "Foreign Accent Syndrome",
+                category: "Neurological",
+                description: "A rare speech disorder resulting from brain damage, causing a sudden shift in speech pattern that sounds like a foreign accent to listeners.",
+                tags: ["speaking", "brain injury", "stroke", "accent", "language", "voice", "talking different"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Othello Syndrome",
+                category: "Psychological",
+                description: "A type of delusional jealousy, marked by suspecting a faithful partner of infidelity, with accompanying jealousy, arguments, and sometimes violence.",
+                tags: ["jealousy", "cheating", "partner", "delusion", "infidelity", "suspicion", "marriage", "shakespeare"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Diogenes Syndrome",
+                category: "Behavioral",
+                description: "A disorder characterized by extreme self-neglect, domestic squalor, social withdrawal, apathy, compulsive hoarding of garbage, and lack of shame.",
+                tags: ["hoarding", "messy", "neglect", "isolation", "trash", "garbage", "elderly", "squalor"],
+                color: "bg-orange-100 text-orange-700 border-orange-200"
+            },
+            {
+                name: "Truman Show Delusion",
+                category: "Psychological",
+                description: "A delusion in which patients believe their lives are staged reality television shows, or that they are being watched on cameras.",
+                tags: ["cameras", "reality tv", "watched", "actor", "simulation", "movie", "fake life", "paranoia"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Anton-Babinski Syndrome",
+                category: "Neurological",
+                description: "A rare symptom of brain damage occurring in the occipital lobe. Those who suffer from it are cortically blind, but affirm, often adamantly and in the face of clear evidence of their blindness, that they are capable of seeing.",
+                tags: ["blind", "denial", "brain damage", "visual", "sight", "lying about seeing", "unaware"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Ekbom's Syndrome",
+                category: "Psychological",
+                description: "Also known as delusional parasitosis, a belief that one is infested with parasites, insects, or bugs, despite lack of medical evidence.",
+                tags: ["bugs", "insects", "itching", "skin", "crawling", "parasites", "infestation", "delusion"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Klüver-Bucy Syndrome",
+                category: "Neurological",
+                description: "A rare behavioral impairment characterized by inappropriate sexual behaviors, putting objects in the mouth, and a lack of fear.",
+                tags: ["inappropriate", "eating", "mouthing", "hypersexuality", "fearless", "brain damage", "amygdala"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Jumping Frenchmen of Maine",
+                category: "Neurological",
+                description: "An extreme exaggerated startle reflex. Individuals will react abnormally to sudden noises or commands, sometimes repeating back words or obeying commands unthinkingly.",
+                tags: ["startle", "jumping", "scared", "reflex", "obey", "lumberjack", "tic", "sudden noise"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Auto-brewery Syndrome",
+                category: "Metabolic",
+                description: "A rare condition in which intoxicating quantities of ethanol are produced through endogenous fermentation within the digestive system. The person essentially gets drunk from eating carbohydrates.",
+                tags: ["drunk", "alcohol", "beer", "fermentation", "yeast", "carbs", "intoxicated", "stomach", "gut"],
+                color: "bg-amber-100 text-amber-700 border-amber-200"
+            },
+            {
+                name: "Takotsubo Cardiomyopathy (Broken Heart Syndrome)",
+                category: "Cardiological",
+                description: "A temporary heart condition brought on by stressful situations and extreme emotions. It can mimic the symptoms of a heart attack.",
+                tags: ["heartbreak", "grief", "sadness", "stress", "heart attack", "loss", "emotion", "chest pain"],
+                color: "bg-red-100 text-red-700 border-red-200"
+            },
+            {
+                name: "Prosopagnosia",
+                category: "Neurological",
+                description: "Also known as face blindness, a cognitive disorder of face perception where the ability to recognize familiar faces, including one's own face, is impaired.",
+                tags: ["faces", "blindness", "strangers", "recognize", "memory", "forgetting", "identity", "mirror"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Kleine-Levin Syndrome",
+                category: "Sleep Disorder",
+                description: "Often called 'Sleeping Beauty Syndrome,' a rare disorder characterized by recurring periods of excessive amounts of sleep (up to 20 hours a day) and altered behavior.",
+                tags: ["sleeping beauty", "tired", "bed", "weeks", "hypersomnia", "fatigue", "hibernation"],
+                color: "bg-indigo-100 text-indigo-700 border-indigo-200"
+            },
+            {
+                name: "Fibrodysplasia Ossificans Progressiva",
+                category: "Genetic",
+                description: "Sometimes referred to as 'Stone Man Syndrome,' a severe genetic disorder where muscle tissue and connective tissue are gradually replaced by bone, forming bone outside the skeleton.",
+                tags: ["bone", "stone", "statue", "calcification", "paralyzed", "skeleton", "rigid", "muscle"],
+                color: "bg-stone-100 text-stone-700 border-stone-200"
+            },
+            {
+                name: "Aquagenic Urticaria",
+                category: "Immunological",
+                description: "A very rare condition, sometimes described as a water allergy, in which hives develop rapidly after the skin comes in contact with water, regardless of its temperature.",
+                tags: ["water", "allergy", "hives", "rain", "tears", "shower", "washing", "skin", "rash"],
+                color: "bg-cyan-100 text-cyan-700 border-cyan-200"
+            },
+            {
+                name: "Hypertrichosis",
+                category: "Genetic",
+                description: "Also called 'Werewolf Syndrome,' an abnormal amount of hair growth over the body, which can be generalized or localized.",
+                tags: ["hair", "werewolf", "wolf", "fur", "hairy", "face", "shaving", "growth"],
+                color: "bg-yellow-100 text-yellow-800 border-yellow-200"
+            },
+            {
+                name: "Gourmand Syndrome",
+                category: "Neurological",
+                description: "A rare eating disorder that occurs after damage to the frontal lobe. Individuals develop a new, obsessive passion for gourmet food and fine dining.",
+                tags: ["food", "eating", "chef", "brain damage", "fine dining", "taste", "obsessive", "gourmet", "stroke"],
+                color: "bg-emerald-100 text-emerald-700 border-emerald-200"
+            },
+            {
+                name: "Fatal Familial Insomnia",
+                category: "Neurological",
+                description: "A very rare and fatal genetic prion disease. The defining symptom is insomnia, which begins mildly but progressively worsens until the patient cannot sleep at all, leading to physical and mental decline.",
+                tags: ["sleep", "insomnia", "prion", "awake", "death", "genetic", "hallucination", "brain"],
+                color: "bg-slate-200 text-slate-800 border-slate-300"
+            },
+            {
+                name: "Pica",
+                category: "Behavioral",
+                description: "A psychological disorder characterized by an appetite for substances that are largely non-nutritive, such as ice, hair, paper, drywall or paint, metal, stones, or soil.",
+                tags: ["eating", "dirt", "paint", "chalk", "hunger", "swallowing", "non-food", "cravings", "chewing"],
+                color: "bg-orange-100 text-orange-700 border-orange-200"
+            },
+            {
+                name: "Williams Syndrome",
+                category: "Genetic",
+                description: "A developmental disorder characterized by mild to moderate intellectual disability, a highly social and outgoing personality, an affinity for music, and distinctive facial features.",
+                tags: ["friendly", "sociable", "music", "elf", "talking", "happy", "outgoing", "smile"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Ondine's Curse",
+                category: "Neurological",
+                description: "Congenital central hypoventilation syndrome. A severe form of sleep apnea in which the patient completely loses the autonomic drive to breathe while sleeping.",
+                tags: ["breathing", "sleep", "lungs", "apnea", "curse", "suffocate", "forgot", "air"],
+                color: "bg-teal-100 text-teal-700 border-teal-200"
+            },
+            {
+                name: "Body Integrity Identity Disorder",
+                category: "Psychological",
+                description: "Also known as Apotemnophilia, a psychological condition wherein physically healthy individuals feel a strong desire to amputate one or more of their healthy limbs.",
+                tags: ["amputate", "limb", "cut off", "surgery", "arms", "legs", "identity", "wheelchair"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Charles Bonnet Syndrome",
+                category: "Neurological",
+                description: "A condition that causes people with declining vision or blindness to see vivid, complex, and recurring visual hallucinations (like patterns, people, or objects).",
+                tags: ["blind", "vision loss", "hallucination", "seeing things", "phantom", "eyes", "ghosts", "patterns"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Trimethylaminuria",
+                category: "Metabolic",
+                description: "Often known as 'Fish Odor Syndrome,' a rare metabolic disorder that causes a defect in the normal production of an enzyme, leading to the body emitting a strong, fishy smell in sweat, breath, and urine.",
+                tags: ["smell", "odor", "fish", "body odor", "scent", "sweat", "breath", "stink", "stinky"],
+                color: "bg-rose-100 text-rose-700 border-rose-200"
+            },
+            {
+                name: "Locked-in Syndrome",
+                category: "Neurological",
+                description: "A rare neurological condition wherein there is complete paralysis of all voluntary muscles except for the ones that control the movements of the eyes. The individual is fully conscious and awake.",
+                tags: ["paralyzed", "awake", "conscious", "trapped", "eyes", "blinking", "coma", "brainstem", "stroke"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Savant Syndrome",
+                category: "Neurological",
+                description: "A rare condition in which someone with significant mental disabilities demonstrates certain abilities far in excess of average, often related to memory, art, or mathematics.",
+                tags: ["genius", "memory", "art", "math", "prodigy", "autism", "rain man", "gifted", "talent"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Munchausen Syndrome by Proxy",
+                category: "Behavioral",
+                description: "Also known as Factitious Disorder Imposed on Another. A mental health problem in which a caregiver makes up or causes an illness or injury in a person under their care, such as a child or elderly adult.",
+                tags: ["fake illness", "caregiver", "child abuse", "poisoning", "attention", "hospital", "parent"],
+                color: "bg-orange-100 text-orange-700 border-orange-200"
+            },
+            {
+                name: "Folie à deux (Shared Psychotic Disorder)",
+                category: "Psychological",
+                description: "A psychiatric syndrome in which symptoms of a delusional belief, and sometimes hallucinations, are transmitted from one individual to another.",
+                tags: ["shared delusion", "madness", "couple", "contagious", "belief", "hallucination", "transmitted"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Clinical Lycanthropy",
+                category: "Psychological",
+                description: "A rare psychiatric syndrome that involves a delusion that the affected person can transform into, has transformed into, or is a non-human animal, most famously a wolf.",
+                tags: ["wolf", "werewolf", "animal", "transformation", "howling", "delusion", "shape-shifting"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Boanthropy",
+                category: "Psychological",
+                description: "A psychological disorder in which a human believes they are a cow or ox, sometimes going as far as to live in fields and eat grass. (Famously afflicted King Nebuchadnezzar II).",
+                tags: ["cow", "ox", "grass", "grazing", "pasture", "animal", "king nebuchadnezzar", "delusion"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Wendigo Psychosis",
+                category: "Psychological",
+                description: "A culture-bound psychiatric syndrome reported among Algonquian-speaking peoples, involving an intense craving for human flesh and fear that one will turn into a cannibal.",
+                tags: ["cannibal", "flesh", "eating people", "monster", "winter", "starvation", "craving", "myth"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Koro Syndrome",
+                category: "Psychological",
+                description: "A psychiatric disorder characterized by anxiety and a deep fear that one's genitals are shrinking or retracting into the body, eventually resulting in death.",
+                tags: ["shrinking", "genitals", "retracting", "panic", "fear", "death", "anxiety", "culture-bound"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Phantom Limb Syndrome",
+                category: "Neurological",
+                description: "The sensation that an amputated or missing limb is still attached. Sufferers often experience pain, itching, or the feeling of movement in the missing appendage.",
+                tags: ["amputee", "missing arm", "missing leg", "ghost limb", "pain", "itch", "surgery"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Tourette Syndrome",
+                category: "Neurological",
+                description: "A nervous system disorder involving repetitive movements or unwanted sounds (tics) that cannot be easily controlled, such as repeatedly blinking, shrugging, or blurting out offensive words.",
+                tags: ["tics", "twitching", "swearing", "cursing", "vocal", "involuntary", "spasm"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Ehlers-Danlos Syndrome",
+                category: "Genetic",
+                description: "A group of inherited disorders that affect your connective tissues, primarily your skin, joints and blood vessel walls, resulting in overly flexible joints and stretchy, fragile skin.",
+                tags: ["flexible", "stretchy skin", "double jointed", "collagen", "bruising", "dislocation", "connective tissue"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Marfan Syndrome",
+                category: "Genetic",
+                description: "A genetic disorder that affects the body’s connective tissue. People with Marfan are usually tall and thin with disproportionately long arms, legs, fingers and toes.",
+                tags: ["tall", "long fingers", "spider fingers", "heart", "aorta", "abraham lincoln", "flexible", "connective tissue"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Synesthesia",
+                category: "Neurological",
+                description: "A neurological condition in which information meant to stimulate one of your senses stimulates several of your senses. People might 'taste' words, 'hear' colors, or see shapes when listening to music.",
+                tags: ["hearing colors", "tasting words", "senses", "mixed up", "numbers", "colors", "music", "perception"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Guillain-Barré Syndrome",
+                category: "Immunological",
+                description: "A rare disorder in which your body's immune system attacks your nerves. Weakness and tingling in your extremities are usually the first symptoms, which can quickly spread and paralyze your whole body.",
+                tags: ["paralysis", "weakness", "tingling", "nerves", "immune system", "infection", "temporary"],
+                color: "bg-cyan-100 text-cyan-700 border-cyan-200"
+            },
+            {
+                name: "Wernicke-Korsakoff Syndrome",
+                category: "Neurological",
+                description: "Often called 'wet brain', it is a type of brain disorder caused by a lack of vitamin B-1 (thiamine), heavily associated with chronic alcoholism, leading to severe memory loss and confabulation.",
+                tags: ["alcohol", "drinking", "memory loss", "amnesia", "confabulation", "lying", "wet brain", "thiamine"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Horner's Syndrome",
+                category: "Neurological",
+                description: "A combination of signs and symptoms caused by the disruption of a nerve pathway from the brain to the face and eye on one side of the body. Results in a drooping eyelid, constricted pupil, and decreased sweating.",
+                tags: ["eye", "drooping eyelid", "pupil", "sweat", "nerve damage", "face", "asymmetry"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Ramsay Hunt Syndrome",
+                category: "Neurological",
+                description: "Occurs when a shingles outbreak affects the facial nerve near one of your ears, causing facial paralysis and hearing loss in the affected ear (famously affected Justin Bieber).",
+                tags: ["shingles", "facial paralysis", "justin bieber", "virus", "ear", "hearing loss", "droop"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Postural Orthostatic Tachycardia Syndrome (POTS)",
+                category: "Cardiological",
+                description: "A condition that affects blood flow. It causes a rapid increase in heartbeat and lightheadedness, or fainting, when standing up from a lying down position.",
+                tags: ["dizzy", "fainting", "standing up", "heart rate", "blood pressure", "tachycardia", "chronic illness"],
+                color: "bg-red-100 text-red-700 border-red-200"
+            },
+            {
+                name: "Cushing's Syndrome",
+                category: "Endocrine",
+                description: "A condition that occurs from exposure to high cortisol levels for a long time. It can cause weight gain, a rounded 'moon' face, and a fatty hump between the shoulders.",
+                tags: ["cortisol", "stress hormone", "moon face", "weight gain", "steroids", "buffalo hump", "purple stretch marks"],
+                color: "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200"
+            },
+            {
+                name: "Addison's Disease",
+                category: "Endocrine",
+                description: "Also called adrenal insufficiency, an uncommon disorder that occurs when your body doesn't produce enough of certain hormones (cortisol and aldosterone), leading to fatigue and darkening of the skin.",
+                tags: ["fatigue", "dark skin", "tan", "hormones", "adrenal gland", "weight loss", "jfk"],
+                color: "bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200"
+            },
+            {
+                name: "Raynaud's Syndrome",
+                category: "Vascular",
+                description: "A condition that causes some areas of your body — such as your fingers and toes — to feel numb and cold in response to cold temperatures or stress. The arteries narrow, turning fingers white or blue.",
+                tags: ["cold", "white fingers", "blue fingers", "blood flow", "numbness", "winter", "stress"],
+                color: "bg-red-100 text-red-700 border-red-200"
+            },
+            {
+                name: "Sjögren's Syndrome",
+                category: "Immunological",
+                description: "An autoimmune disorder primarily identified by its two most common symptoms: dry eyes and a dry mouth, resulting from the body attacking glands that make tears and saliva.",
+                tags: ["dry eyes", "dry mouth", "tears", "saliva", "autoimmune", "thirsty", "glands"],
+                color: "bg-cyan-100 text-cyan-700 border-cyan-200"
+            },
+            {
+                name: "Behçet's Syndrome",
+                category: "Immunological",
+                description: "A rare, chronic disorder that causes blood vessel inflammation throughout your body, leading to mouth sores, eye inflammation, skin rashes, and genital sores.",
+                tags: ["sores", "ulcers", "inflammation", "blood vessels", "autoimmune", "rash"],
+                color: "bg-cyan-100 text-cyan-700 border-cyan-200"
+            },
+            {
+                name: "Toxic Shock Syndrome",
+                category: "Infectious",
+                description: "A rare, life-threatening complication of certain types of bacterial infections, historically associated with superabsorbent tampons, causing sudden fever, low blood pressure, and a rash.",
+                tags: ["tampon", "bacteria", "fever", "rash", "staph", "infection", "sudden drop"],
+                color: "bg-amber-100 text-amber-700 border-amber-200"
+            },
+            {
+                name: "Carpal Tunnel Syndrome",
+                category: "Physical",
+                description: "Caused by pressure on the median nerve in the wrist, leading to numbness, tingling, and weakness in the hand and arm. Often associated with repetitive motions like typing.",
+                tags: ["typing", "wrist", "hand", "numbness", "pain", "nerve", "keyboard", "mouse"],
+                color: "bg-stone-100 text-stone-700 border-stone-200"
+            },
+            {
+                name: "Compartment Syndrome",
+                category: "Physical",
+                description: "A painful and dangerous condition caused by pressure buildup from internal bleeding or swelling of tissues inside a muscle compartment, stopping blood flow.",
+                tags: ["swelling", "pressure", "muscle", "bleeding", "trauma", "leg", "crush injury", "surgery"],
+                color: "bg-stone-100 text-stone-700 border-stone-200"
+            },
+            {
+                name: "Sick Building Syndrome",
+                category: "Environmental",
+                description: "A situation in which building occupants experience acute health and comfort effects that appear to be linked to time spent in a specific building, often due to poor air quality.",
+                tags: ["office", "work", "air quality", "mold", "headache", "ventilation", "sick at work"],
+                color: "bg-slate-200 text-slate-800 border-slate-300"
+            },
+            {
+                name: "Empty Sella Syndrome",
+                category: "Neurological",
+                description: "A rare condition in which the pituitary gland shrinks or becomes flattened, making the sella turcica (the bony structure that houses it) look empty on an MRI.",
+                tags: ["pituitary", "brain", "mri", "hormones", "headache", "bony structure"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Superior Canal Dehiscence Syndrome",
+                category: "Otological",
+                description: "A rare inner ear condition where a hole in the bone covering the inner ear causes individuals to hear internal body sounds abnormally loud, like their own heartbeat, eye movements, or footsteps.",
+                tags: ["hearing", "ear", "heartbeat", "eyes moving", "footsteps", "loud", "internal sounds", "dizzy"],
+                color: "bg-teal-100 text-teal-700 border-teal-200"
+            },
+            {
+                name: "Mallory-Weiss Syndrome",
+                category: "Gastrointestinal",
+                description: "A condition characterized by bleeding from tears in the mucosa at the junction of the stomach and esophagus, usually caused by severe retching, coughing, or vomiting.",
+                tags: ["vomiting", "throwing up", "bleeding", "stomach", "esophagus", "alcohol", "tearing"],
+                color: "bg-yellow-100 text-yellow-800 border-yellow-200"
+            },
+            {
+                name: "Zollinger-Ellison Syndrome",
+                category: "Gastrointestinal",
+                description: "A rare condition in which one or more tumors form in your pancreas or the upper part of your small intestine, secreting a hormone that leads to extreme stomach acid and ulcers.",
+                tags: ["stomach acid", "ulcers", "tumor", "pancreas", "heartburn", "gastrin", "digestion"],
+                color: "bg-yellow-100 text-yellow-800 border-yellow-200"
+            },
+            {
+                name: "Budd-Chiari Syndrome",
+                category: "Hepatic",
+                description: "A very rare condition caused by occlusion (blocking) of the hepatic veins that drain the liver, leading to abdominal pain, ascites (fluid in abdomen), and liver enlargement.",
+                tags: ["liver", "blood clot", "abdomen", "swelling", "veins", "jaundice", "pain"],
+                color: "bg-lime-100 text-lime-800 border-lime-200"
+            },
+            {
+                name: "Brugada Syndrome",
+                category: "Cardiological",
+                description: "A rare, genetic disorder that causes a dangerous irregular heartbeat (arrhythmia) in the heart's lower chambers, which can lead to sudden cardiac arrest, especially during sleep.",
+                tags: ["heartbeat", "sudden death", "sleep", "cardiac arrest", "arrhythmia", "fainting"],
+                color: "bg-red-100 text-red-700 border-red-200"
+            },
+            {
+                name: "Wolff-Parkinson-White Syndrome",
+                category: "Cardiological",
+                description: "A condition in which there is an extra electrical pathway in the heart. The condition can lead to periods of rapid heart rate (tachycardia).",
+                tags: ["heart rate", "rapid", "electrical", "palpitations", "extra pathway", "tachycardia"],
+                color: "bg-red-100 text-red-700 border-red-200"
+            },
+            {
+                name: "Reye's Syndrome",
+                category: "Neurological",
+                description: "A rare but serious condition that causes swelling in the liver and brain, most often affecting children and teenagers recovering from a viral infection, sometimes linked to aspirin use.",
+                tags: ["aspirin", "children", "liver", "brain swelling", "viral", "fever", "confusion"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Havana Syndrome",
+                category: "Environmental",
+                description: "A set of medical signs and symptoms (ringing in ears, headaches, cognitive difficulties) first reported by U.S. and Canadian embassy staff in Cuba, whose exact cause remains controversial and unknown.",
+                tags: ["cuba", "embassy", "spies", "ringing ears", "headache", "microwave", "acoustic", "mystery"],
+                color: "bg-slate-200 text-slate-800 border-slate-300"
+            },
+            {
+                name: "Proteus Syndrome",
+                category: "Genetic",
+                description: "A rare condition characterized by overgrowth of the bones, skin, and other tissues. Organs and tissues affected by the disease grow out of proportion to the rest of the body (famously affected Joseph Merrick, the 'Elephant Man').",
+                tags: ["overgrowth", "bones", "elephant man", "tumors", "asymmetry", "joseph merrick", "skin"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Progeria (Hutchinson-Gilford Syndrome)",
+                category: "Genetic",
+                description: "An extremely rare, progressive genetic disorder that causes children to age rapidly, starting in their first two years of life, leading to hair loss, aged skin, and heart disease.",
+                tags: ["aging", "old child", "wrinkles", "rapid aging", "hair loss", "benjamin button", "fatal"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Treacher Collins Syndrome",
+                category: "Genetic",
+                description: "A genetic disorder characterized by deformities of the ears, eyes, cheekbones, and chin. The degree to which a person is affected varies from mild to severe (famously depicted in the book/movie 'Wonder').",
+                tags: ["face", "cheekbones", "jaw", "wonder movie", "deformity", "hearing loss", "surgery"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Cri-du-chat Syndrome",
+                category: "Genetic",
+                description: "Also known as 5p- syndrome, it is a chromosomal condition that results when a piece of chromosome 5 is missing. Infants with this condition often have a high-pitched cry that sounds like that of a cat.",
+                tags: ["cat cry", "baby", "chromosomes", "intellectual disability", "meow", "infant"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Waardenburg Syndrome",
+                category: "Genetic",
+                description: "A group of genetic conditions that can cause hearing loss and changes in coloring (pigmentation) of the hair, skin, and eyes. People often have very pale blue eyes, heterochromia, or a white forelock of hair.",
+                tags: ["white hair", "blue eyes", "deafness", "pigment", "two different eyes", "heterochromia", "forelock"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Usher Syndrome",
+                category: "Genetic",
+                description: "The most common condition that affects both hearing and vision. A genetic disease that causes a major loss of hearing and an eye disorder called retinitis pigmentosa (gradual blindness).",
+                tags: ["deafblind", "blindness", "deafness", "vision loss", "hearing loss", "retinitis", "tunnel vision"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Rett Syndrome",
+                category: "Genetic",
+                description: "A rare genetic neurological and developmental disorder that affects the way the brain develops, causing a progressive loss of motor skills and speech, primarily affecting females.",
+                tags: ["girls", "loss of speech", "hand wringing", "developmental", "regression", "motor skills"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Fragile X Syndrome",
+                category: "Genetic",
+                description: "A genetic disorder that causes a range of developmental problems including learning disabilities and cognitive impairment. It is the most common inherited cause of intellectual disability in males.",
+                tags: ["intellectual disability", "boys", "autism-like", "learning", "genetics", "chromosome"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Turner Syndrome",
+                category: "Genetic",
+                description: "A condition that affects only females, resulting when one of the X chromosomes is missing or partially missing. It can cause short stature, delayed puberty, and heart defects.",
+                tags: ["females", "short", "infertility", "chromosome X", "puberty", "webbed neck"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Klinefelter Syndrome",
+                category: "Genetic",
+                description: "A genetic condition in which a male is born with an extra copy of the X chromosome (XXY). It can cause lower testosterone production, reduced muscle mass, and enlarged breast tissue.",
+                tags: ["males", "extra chromosome", "testosterone", "infertility", "tall", "XXY"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Patau Syndrome (Trisomy 13)",
+                category: "Genetic",
+                description: "A rare and serious genetic condition caused by having an additional copy of chromosome 13 in some or all of the body's cells, causing severe intellectual disability and physical abnormalities.",
+                tags: ["trisomy 13", "cleft lip", "extra fingers", "polydactyly", "severe", "chromosome", "infant"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Edwards Syndrome (Trisomy 18)",
+                category: "Genetic",
+                description: "A rare and serious genetic condition caused by an extra copy of chromosome 18. It causes severe developmental delays and physical abnormalities, often life-threatening in early infancy.",
+                tags: ["trisomy 18", "clenched hands", "severe", "heart defects", "chromosome", "infant"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Down Syndrome (Trisomy 21)",
+                category: "Genetic",
+                description: "A genetic disorder caused when abnormal cell division results in an extra full or partial copy of chromosome 21, causing developmental changes and distinct physical features.",
+                tags: ["trisomy 21", "intellectual disability", "facial features", "common", "chromosome", "developmental"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Brown-Séquard Syndrome",
+                category: "Neurological",
+                description: "A rare neurological condition characterized by a lesion in the spinal cord which results in weakness or paralysis on one side of the body and a loss of sensation on the opposite side.",
+                tags: ["spinal cord", "paralysis", "half body", "sensation loss", "injury", "trauma", "lesion"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Goodpasture Syndrome",
+                category: "Immunological",
+                description: "A rare, life-threatening autoimmune disease in which antibodies attack the basement membrane in lungs and kidneys, leading to bleeding from the lungs and kidney failure.",
+                tags: ["lungs", "kidneys", "coughing blood", "autoimmune", "renal failure", "bleeding"],
+                color: "bg-cyan-100 text-cyan-700 border-cyan-200"
+            },
+            {
+                name: "Sanfilippo Syndrome",
+                category: "Genetic",
+                description: "Sometimes called childhood Alzheimer's, a rare genetic metabolism disorder that causes severe damage to the central nervous system, leading to a loss of speech, cognitive decline, and early death.",
+                tags: ["childhood alzheimer's", "metabolism", "dementia", "loss of skills", "fatal", "brain damage"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Morquio Syndrome",
+                category: "Genetic",
+                description: "A rare genetic condition in which the body lacks enzymes to break down sugar chains, causing abnormal bone development, short stature, and heart/lung problems.",
+                tags: ["dwarfism", "bones", "enzymes", "sugar chains", "spine", "short stature"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Crouzon Syndrome",
+                category: "Genetic",
+                description: "A genetic disorder characterized by the premature fusion of certain skull bones (craniosynostosis). This prevents the skull from growing normally and affects the shape of the head and face.",
+                tags: ["skull", "face shape", "bulging eyes", "craniosynostosis", "bones", "surgery"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Apert Syndrome",
+                category: "Genetic",
+                description: "A genetic disorder that causes abnormal development of the skull, leading to a distorted face and head shape, and syndactyly (webbed or fused fingers and toes).",
+                tags: ["webbed fingers", "fused toes", "skull", "face shape", "craniosynostosis", "syndactyly"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Noonan Syndrome",
+                category: "Genetic",
+                description: "A genetic disorder that prevents normal development in various parts of the body. A person can be affected in various ways, including unusual facial characteristics, short stature, and heart defects.",
+                tags: ["heart defects", "short", "face features", "chest shape", "developmental", "webbed neck"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Todd's Paralysis",
+                category: "Neurological",
+                description: "A neurological condition experienced by individuals with epilepsy, in which a seizure is followed by a brief period of temporary paralysis. The paralysis may be partial or complete.",
+                tags: ["seizure", "epilepsy", "paralysis", "temporary", "weakness", "post-ictal"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Tietze Syndrome",
+                category: "Physical",
+                description: "A rare, inflammatory disorder characterized by chest pain and swelling of the cartilage that attaches the upper ribs to the breastbone (costochondral junction). Mimics a heart attack.",
+                tags: ["chest pain", "ribs", "cartilage", "swelling", "heart attack mimic", "inflammation"],
+                color: "bg-stone-100 text-stone-700 border-stone-200"
+            },
+            {
+                name: "Stevens-Johnson Syndrome",
+                category: "Immunological",
+                description: "A rare, serious disorder of the skin and mucous membranes. It's usually a reaction to medication that starts with flu-like symptoms, followed by a painful rash that spreads and blisters.",
+                tags: ["rash", "blisters", "medication reaction", "skin peeling", "allergy", "burn unit", "mucous membranes"],
+                color: "bg-cyan-100 text-cyan-700 border-cyan-200"
+            },
+            {
+                name: "Angelman Syndrome",
+                category: "Genetic",
+                description: "A genetic disorder that causes delayed development, problems with speech and balance, intellectual disability, and, sometimes, seizures. People with this syndrome often smile and laugh frequently.",
+                tags: ["happy", "smiling", "laughing", "puppet", "developmental", "speech delay", "seizures"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Prader-Willi Syndrome",
+                category: "Genetic",
+                description: "A rare genetic disorder that causes a constant sense of hunger that usually begins at about 2 years of age. People with PWS want to eat constantly because they never feel full, leading to dangerous weight gain.",
+                tags: ["hunger", "eating", "never full", "obesity", "food seeking", "chromosome 15", "starving"],
+                color: "bg-green-100 text-green-700 border-green-200"
+            },
+            {
+                name: "Erotomania (De Clérambault's Syndrome)",
+                category: "Psychological",
+                description: "A rare delusional disorder in which a person strongly believes that another individual (often a celebrity or a person of higher social status) is secretly in love with them.",
+                tags: ["stalker", "celebrity", "secret love", "delusion", "romance", "unrequited", "obsession"],
+                color: "bg-purple-100 text-purple-700 border-purple-200"
+            },
+            {
+                name: "Möbius Syndrome",
+                category: "Neurological",
+                description: "A rare congenital neurological disorder characterized by facial paralysis and the inability to move the eyes from side to side. People with the condition cannot smile, frown, or blink.",
+                tags: ["no expression", "cannot smile", "facial paralysis", "eyes", "staring", "cranial nerves"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            },
+            {
+                name: "Gerstmann Syndrome",
+                category: "Neurological",
+                description: "A cognitive impairment that results from damage to a specific area of the brain. It features four primary symptoms: inability to write, inability to do math, inability to identify fingers, and left-right confusion.",
+                tags: ["math", "writing", "fingers", "left right", "confusion", "brain damage", "stroke", "dysgraphia"],
+                color: "bg-blue-100 text-blue-700 border-blue-200"
+            }
+        ];
+
+        const categories = ["All", ...new Set(syndromesDatabase.map(s => s.category))].sort();
+        
+        let state = {
+            query: "",
+            activeCategory: "All",
+            lang: "en",
+            theme: "light"
+        };
+
+        const uiText = {
+            en: {
+                title: '<i class="fa-solid fa-brain text-brand-500"></i> Syndrome Explorer',
+                subtitle: 'Discover and understand fascinating psychological and physical syndromes.',
+                searchPlaceholder: "Search by name, symptoms, or context (e.g., 'going with bad guy')...",
+                resultsCount: (count) => `${count} <span class="text-slate-400 dark:text-slate-500 font-normal">syndrome${count !== 1 ? 's' : ''} found</span>`,
+                emptyTitle: "No syndromes found",
+                emptyDesc: "We couldn't find anything matching your search criteria. Try using different keywords or clearing your filters.",
+                clearBtn: "Clear Search",
+                matchContext: "Match Context:",
+                footer: "Information provided is for educational purposes and is not medical advice.",
+                langBtn: "عربي",
+                allCategory: "All",
+                wikiLink: "Read on Wikipedia"
+            },
+            ar: {
+                title: '<i class="fa-solid fa-brain text-brand-500"></i> مستكشف المتلازمات',
+                subtitle: 'اكتشف وافهم المتلازمات النفسية والجسدية الرائعة.',
+                searchPlaceholder: "ابحث بالاسم، الأعراض، أو السياق (مثل 'الذهاب مع الشرير')...",
+                resultsCount: (count) => `${count} <span class="text-slate-400 dark:text-slate-500 font-normal">متلازمة وجدت</span>`,
+                emptyTitle: "لم يتم العثور على متلازمات",
+                emptyDesc: "لم نتمكن من العثور على أي شيء يطابق معايير البحث الخاصة بك. جرب استخدام كلمات رئيسية مختلفة أو مسح المرشحات.",
+                clearBtn: "مسح البحث",
+                matchContext: "سياق المطابقة:",
+                footer: "المعلومات المقدمة هي للأغراض التعليمية وليست نصيحة طبية.",
+                langBtn: "English",
+                allCategory: "الكل",
+                wikiLink: "اقرأ على ويكيبيديا"
+            }
+        };
+
+        const catTranslations = {
+            "Psychological": "نفسية", "Psychosomatic": "نفسية جسدية", "Neurological": "عصبية",
+            "Behavioral": "سلوكية", "Sleep Disorder": "اضطراب النوم", "Metabolic": "أيضية",
+            "Cardiological": "قلبية", "Genetic": "وراثية", "Immunological": "مناعية",
+            "Endocrine": "غدد صماء", "Vascular": "أوعية دموية", "Infectious": "معدية",
+            "Physical": "جسدية", "Environmental": "بيئية", "Otological": "أذنيه",
+            "Gastrointestinal": "هضمية", "Hepatic": "كبدية", "All": "الكل"
+        };
+
+        const preciseAr = {
+            "Stockholm Syndrome": { name_ar: "متلازمة ستوكهولم", description_ar: "استجابة نفسية يطور فيها الرهائن أو ضحايا الإساءة رابطة عاطفية مع آسريهم أو المسيئين إليهم.", tags_ar: ["رهينة", "اختطاف", "الشرير", "آسر", "حب", "تعاطف", "إساءة", "صدمة", "بقاء"] },
+            "Lima Syndrome": { name_ar: "متلازمة ليما", description_ar: "الظاهرة المعاكسة تماماً لمتلازمة ستوكهولم؛ حيث يطور الخاطفون تعاطفاً مع رهائنهم.", tags_ar: ["آسر", "تعاطف", "رهينة", "ذنب", "خاطف يهتم", "عكس ستوكهولم"] },
+            "Paris Syndrome": { name_ar: "متلازمة باريس", description_ar: "شعور بخيبة أمل شديدة يصيب بعض الأفراد عند زيارة باريس، حيث يشعرون أن المدينة لم تكن كما توقعوا، مما قد يؤدي إلى هلوسة وقلق.", tags_ar: ["سفر", "خيبة أمل", "سائح", "فرنسا", "صدمة", "توقعات لم تتحقق", "إجازة"] },
+            "Jerusalem Syndrome": { name_ar: "متلازمة القدس", description_ar: "مجموعة من الظواهر العقلية تتضمن أفكاراً دينية مهووسة أو أوهاماً أو تجارب تشبه الذهان تظهر عند زيارة مدينة القدس.", tags_ar: ["دين", "مقدس", "وهم", "مسيح", "ذهان", "سفر", "إسرائيل", "نبي"] },
+            "Capgras Delusion": { name_ar: "وهم كابجراس", description_ar: "اعتقاد غير عقلاني بأن شخصاً مألوفاً أو مكاناً قد تم استبداله بنسخة مطابقة أو محتال.", tags_ar: ["محتال", "مزيف", "مستبدل", "عائلة", "فضائي", "شبيه", "مستنسخ", "غريب"] },
+            "Fregoli Delusion": { name_ar: "وهم فريجولي", description_ar: "اضطراب نادر يعتقد فيه الشخص أن أشخاصاً مختلفين هم في الواقع شخص واحد يغير مظهره أو يتنكر.", tags_ar: ["تنكر", "نفس الشخص", "مطارد", "اضطهاد", "متحول", "بارانويا"] },
+            "Cotard's Syndrome": { name_ar: "متلازمة كوتار", description_ar: "تُعرف أيضاً بمتلازمة الجثة المتحركة؛ مرض عقلي نادر يعتقد فيه المصاب أنه ميت بالفعل، أو غير موجود، أو يتعفن، أو فقد دمه وأعضاءه الداخلية.", tags_ar: ["ميت", "زومبي", "أعضاء مفقودة", "لحم", "تعفن", "عدمية", "شبح"] },
+            "Alice in Wonderland Syndrome": { name_ar: "متلازمة أليس في بلاد العجائب", description_ar: "حالة عصبية ونفسية تسبب تشوهاً في الإدراك. قد يرى الأشخاص الأشياء أصغر أو أكبر أو أقرب أو أبعد مما هي عليه.", tags_ar: ["حجم", "تقلص", "نمو", "إدراك", "هلوسة", "خيال", "عملاق", "صغير"] },
+            "Alien Hand Syndrome": { name_ar: "متلازمة اليد الغريبة", description_ar: "حالة عصبية نادرة يشعر فيها الشخص أن أحد أطرافه يتصرف من تلقاء نفسه، دون سيطرة على أفعاله.", tags_ar: ["طرف متمرد", "لا يمكن السيطرة عليه", "يد", "جراحة الدماغ", "ممسوس", "لا إرادي"] },
+            "Stendhal Syndrome": { name_ar: "متلازمة ستندال", description_ar: "حالة نفسية جسدية تتضمن تسارع ضربات القلب، والإغماء، والارتباك، وحتى الهلوسة، تحدث عند التعرض لأشياء بالغة الجمال أو فنون عظيمة.", tags_ar: ["فن", "جمال", "إغماء", "متحف", "إرهاق", "فلورنسا", "تحفة", "ذعر"] },
+            "Munchausen Syndrome": { name_ar: "متلازمة مونخهاوزن", description_ar: "اضطراب مفتعل يدعي فيه المصابون المرض أو الإصابة لجذب الانتباه والتعاطف والاطمئنان لأنفسهم.", tags_ar: ["مرض مزيف", "انتباه", "مستشفى", "كذب", "تمثيل", "تعاطف", "تسوق الأطباء"] },
+            "Exploding Head Syndrome": { name_ar: "متلازمة الرأس المنفجر", description_ar: "حالة يعاني فيها الشخص من سماع ضوضاء غير حقيقية وعالية جداً وقصيرة الأمد عند النوم أو الاستيقاظ.", tags_ar: ["نوم", "ضوضاء", "قنبلة", "استيقاظ", "فرقعة", "طلق ناري", "هلوسة", "أرق"] },
+            "Foreign Accent Syndrome": { name_ar: "متلازمة اللكنة الأجنبية", description_ar: "اضطراب نادر في النطق ناتج عن تلف في الدماغ، يتسبب في تغير مفاجئ في طريقة الكلام يبدو للمستمعين كلغة أو لكنة أجنبية.", tags_ar: ["تحدث", "إصابة الدماغ", "سكتة دماغية", "لكنة", "لغة", "صوت", "تحدث مختلف"] },
+            "Othello Syndrome": { name_ar: "متلازمة عطيل", description_ar: "نوع من الغيرة الوهمية، يتميز بالشك في خيانة شريك مخلص، مع غيرة شديدة وجدال وأحياناً عنف.", tags_ar: ["غيرة", "خيانة", "شريك", "وهم", "شك", "زواج", "شكسبير"] },
+            "Diogenes Syndrome": { name_ar: "متلازمة ديوجين", description_ar: "اضطراب يتميز بالإهمال الشديد للذات، والقذارة المنزلية، والعزلة الاجتماعية، واللامبالاة، واكتناز القمامة القهري.", tags_ar: ["اكتناز", "فوضى", "إهمال", "عزلة", "قمامة", "كبار السن", "قذارة"] },
+            "Truman Show Delusion": { name_ar: "وهم عرض ترومان", description_ar: "وهم يعتقد فيه المرضى أن حياتهم عبارة عن برامج تلفزيون واقعية مدبرة، أو أنهم مراقبون بالكاميرات.", tags_ar: ["كاميرات", "تلفزيون الواقع", "مراقب", "ممثل", "محاكاة", "فيلم", "حياة مزيفة", "بارانويا"] },
+            "Anton-Babinski Syndrome": { name_ar: "متلازمة أنتون-بابينسكي", description_ar: "عرض نادر لتلف الدماغ. يعاني المصابون من عمى قشري، لكنهم يؤكدون بإصرار شديد أنهم قادرون على الرؤية، رغم الأدلة الواضحة.", tags_ar: ["أعمى", "إنكار", "تلف الدماغ", "بصري", "رؤية", "كذب حول الرؤية", "غير مدرك"] },
+            "Ekbom's Syndrome": { name_ar: "متلازمة إيكبوم", description_ar: "تعرف أيضاً بوهام التطفل، وهي اعتقاد الشخص بأنه مصاب بطفيليات أو حشرات، رغم عدم وجود دليل طبي.", tags_ar: ["حشرات", "بق", "حكة", "جلد", "زحف", "طفيليات", "إصابة", "وهم"] },
+            "Klüver-Bucy Syndrome": { name_ar: "متلازمة كلوفر بوسي", description_ar: "ضعف سلوكي نادر يتميز بسلوكيات جنسية غير لائقة، ووضع الأشياء في الفم، وانعدام الخوف.", tags_ar: ["غير لائق", "أكل", "فم", "فرط النشاط الجنسي", "لا يخاف", "تلف الدماغ", "لوزة الدماغ"] },
+            "Jumping Frenchmen of Maine": { name_ar: "فرنسيو ماين القافزون", description_ar: "رد فعل مفاجئ ومبالغ فيه. يتفاعل الأفراد بشكل غير طبيعي مع الضوضاء أو الأوامر المفاجئة، وأحياناً يكررون الكلمات أو يطيعون الأوامر دون تفكير.", tags_ar: ["فزع", "قفز", "خائف", "رد فعل", "طاعة", "حطاب", "تشنج لاإرادي", "ضوضاء مفاجئة"] },
+            "Auto-brewery Syndrome": { name_ar: "متلازمة التخمر الذاتي", description_ar: "حالة نادرة يتم فيها إنتاج كميات مسكرة من الإيثانول من خلال التخمر الداخلي في الجهاز الهضمي، حيث يسكر الشخص من تناول الكربوهيدرات.", tags_ar: ["سكران", "كحول", "بيرة", "تخمر", "خميرة", "كربوهيدرات", "مسمم", "معدة", "أمعاء"] },
+            "Takotsubo Cardiomyopathy (Broken Heart Syndrome)": { name_ar: "متلازمة القلب المنكسر", description_ar: "حالة قلبية مؤقتة ناتجة عن المواقف العصيبة والعواطف الشديدة. يمكن أن تحاكي أعراض النوبة القلبية.", tags_ar: ["انكسار القلب", "حزن", "إجهاد", "نوبة قلبية", "فقدان", "عاطفة", "ألم الصدر"] },
+            "Prosopagnosia": { name_ar: "عمى التعرف على الوجوه", description_ar: "اضطراب إدراكي لتمييز الوجوه حيث تضعف القدرة على التعرف على الوجوه المألوفة، بما في ذلك وجه الشخص نفسه.", tags_ar: ["وجوه", "عمى", "غرباء", "تعرف", "ذاكرة", "نسيان", "هوية", "مرآة"] },
+            "Kleine-Levin Syndrome": { name_ar: "متلازمة كلاين-ليفين", description_ar: "تُسمى غالباً 'متلازمة الجمال النائم'، وهي اضطراب نادر يتميز بفترات متكررة من النوم المفرط (حتى 20 ساعة يومياً) وسلوك متغير.", tags_ar: ["الجمال النائم", "متعب", "سرير", "أسابيع", "فرط النوم", "إرهاق", "سبات"] },
+            "Fibrodysplasia Ossificans Progressiva": { name_ar: "متلازمة الرجل الصخري", description_ar: "اضطراب وراثي شديد حيث يتم استبدال الأنسجة العضلية والضامة تدريجياً بالعظام، مما يشكل عظاماً خارج الهيكل العظمي.", tags_ar: ["عظم", "حجر", "تمثال", "تكلس", "مشلول", "هيكل عظمي", "صلب", "عضلة"] },
+            "Aquagenic Urticaria": { name_ar: "حساسية الماء", description_ar: "حالة نادرة جداً تتطور فيها خلايا النحل (الشرى) بسرعة بعد ملامسة الجلد للماء، بغض النظر عن درجة حرارته.", tags_ar: ["ماء", "حساسية", "شرى", "مطر", "دموع", "استحمام", "غسيل", "جلد", "طفح جلدي"] },
+            "Hypertrichosis": { name_ar: "فرط الأشعار (متلازمة المستذئب)", description_ar: "نمو غير طبيعي للشعر في جميع أنحاء الجسم، والذي يمكن أن يكون عاماً أو موضعياً.", tags_ar: ["شعر", "مستذئب", "ذئب", "فرو", "مشعر", "وجه", "حلاقة", "نمو"] },
+            "Gourmand Syndrome": { name_ar: "متلازمة الشراهة", description_ar: "اضطراب أكل نادر يحدث بعد تلف الفص الجبهي. يطور الأفراد شغفاً هوسياً جديداً بالأطعمة الفاخرة وتناول الطعام الراقي.", tags_ar: ["طعام", "أكل", "طاهي", "تلف الدماغ", "طعام فاخر", "مذاق", "هوس", "ذواق", "سكتة دماغية"] },
+            "Fatal Familial Insomnia": { name_ar: "الأرق العائلي المميت", description_ar: "مرض بريون وراثي نادر جداً وقاتل. العرض الرئيسي هو الأرق الذي يبدأ خفيفاً ويزداد سوءاً حتى لا يتمكن المريض من النوم إطلاقاً.", tags_ar: ["نوم", "أرق", "بريون", "مستيقظ", "موت", "وراثي", "هلوسة", "دماغ"] },
+            "Pica": { name_ar: "وحم (بيكا)", description_ar: "اضطراب نفسي يتميز بالشهية لمواد غير مغذية إلى حد كبير، مثل الثلج، الشعر، الورق، الطلاء، المعادن، الحجارة، أو التربة.", tags_ar: ["أكل", "تراب", "طلاء", "طبشور", "جوع", "ابتلاع", "غير غذائي", "رغبة ملحة", "مضغ"] },
+            "Williams Syndrome": { name_ar: "متلازمة ويليامز", description_ar: "اضطراب نمو يتميز بإعاقة ذهنية خفيفة إلى متوسطة، وشخصية اجتماعية ومنفتحة للغاية، وتقارب مع الموسيقى، وملامح وجه مميزة.", tags_ar: ["ودود", "اجتماعي", "موسيقى", "قزم", "تحدث", "سعيد", "منفتح", "ابتسامة"] },
+            "Ondine's Curse": { name_ar: "لعنة أوندين", description_ar: "متلازمة نقص التهوية المركزي الخلقي. شكل حاد من انقطاع النفس النومي حيث يفقد المريض تماماً الدافع اللاإرادي للتنفس أثناء النوم.", tags_ar: ["تنفس", "نوم", "رئتين", "انقطاع النفس", "لعنة", "اختناق", "نسيان", "هواء"] },
+            "Body Integrity Identity Disorder": { name_ar: "اضطراب هوية سلامة الجسم", description_ar: "حالة نفسية يشعر فيها الأفراد الأصحاء جسدياً برغبة قوية في بتر طرف واحد أو أكثر من أطرافهم السليمة.", tags_ar: ["بتر", "طرف", "قطع", "جراحة", "أذرع", "أرجل", "هوية", "كرسي متحرك"] },
+            "Charles Bonnet Syndrome": { name_ar: "متلازمة شارل بونيه", description_ar: "حالة تتسبب في رؤية الأشخاص الذين يعانون من ضعف الرؤية أو العمى لهلوسات بصرية حية ومعقدة ومتكررة.", tags_ar: ["أعمى", "فقدان الرؤية", "هلوسة", "رؤية أشياء", "شبح", "عيون", "أشباح", "أنماط"] },
+            "Trimethylaminuria": { name_ar: "متلازمة رائحة السمك", description_ar: "اضطراب استقلابي نادر يسبب نقصاً في إنتاج إنزيم طبيعي، مما يؤدي إلى انبعاث رائحة قوية تشبه رائحة السمك في العرق والنفس والبول.", tags_ar: ["رائحة", "عفونة", "سمك", "رائحة الجسم", "عرق", "نفس", "نتن"] },
+            "Locked-in Syndrome": { name_ar: "متلازمة المنحبس", description_ar: "حالة عصبية نادرة يحدث فيها شلل كامل لجميع العضلات الإرادية باستثناء تلك التي تتحكم في حركات العين. يكون الفرد واعياً ومستيقظاً تماماً.", tags_ar: ["مشلول", "مستيقظ", "واعي", "محبوس", "عيون", "رمش", "غيبوبة", "جذع الدماغ", "سكتة دماغية"] },
+            "Savant Syndrome": { name_ar: "متلازمة الموهوب", description_ar: "حالة نادرة يُظهر فيها شخص يعاني من إعاقات عقلية كبيرة قدرات معينة تفوق المتوسط بكثير، غالباً ما تتعلق بالذاكرة أو الفن أو الرياضيات.", tags_ar: ["عبقري", "ذاكرة", "فن", "رياضيات", "معجزة", "توحد", "موهوب", "موهبة"] },
+            "Munchausen Syndrome by Proxy": { name_ar: "متلازمة مونخهاوزن بالوكالة", description_ar: "مشكلة صحية نفسية يختلق فيها مقدم الرعاية مرضاً أو إصابة في شخص تحت رعايته، مثل طفل أو شخص مسن.", tags_ar: ["مرض مزيف", "مقدم رعاية", "إساءة للأطفال", "تسمم", "انتباه", "مستشفى", "والد"] },
+            "Folie à deux (Shared Psychotic Disorder)": { name_ar: "الذهان المشترك (جنون ثنائي)", description_ar: "متلازمة نفسية تنتقل فيها أعراض الاعتقاد الوهمي، وأحياناً الهلوسة، من فرد إلى آخر.", tags_ar: ["وهم مشترك", "جنون", "زوج", "معدي", "اعتقاد", "هلوسة", "منقول"] },
+            "Clinical Lycanthropy": { name_ar: "الاستذئاب السريري", description_ar: "متلازمة نفسية نادرة تتضمن وهماً بأن الشخص المصاب يمكن أن يتحول، أو قد تحول، أو أنه حيوان غير بشري، وأشهرها الذئب.", tags_ar: ["ذئب", "مستذئب", "حيوان", "تحول", "عواء", "وهم", "تغيير الشكل"] },
+            "Boanthropy": { name_ar: "توهم التحول لبقرة", description_ar: "اضطراب نفسي يعتقد فيه الإنسان أنه بقرة أو ثور، وأحياناً يذهب إلى حد العيش في الحقول وأكل العشب.", tags_ar: ["بقرة", "ثور", "عشب", "رعي", "مرعى", "حيوان", "نبوخذ نصر", "وهم"] },
+            "Wendigo Psychosis": { name_ar: "ذهان وينديجو", description_ar: "متلازمة نفسية مرتبطة بالثقافة، تتضمن رغبة شديدة في أكل لحم البشر والخوف من التحول إلى آكل لحوم البشر.", tags_ar: ["آكل لحوم البشر", "لحم", "أكل الناس", "وحش", "شتاء", "مجاعة", "رغبة ملحة", "أسطورة"] },
+            "Koro Syndrome": { name_ar: "متلازمة كورو", description_ar: "اضطراب نفسي يتميز بالقلق والخوف العميق من أن الأعضاء التناسلية تنكمش أو تتراجع إلى داخل الجسم، مما قد يؤدي في النهاية إلى الموت.", tags_ar: ["انكماش", "أعضاء تناسلية", "تراجع", "ذعر", "خوف", "موت", "قلق", "مرتبط بالثقافة"] },
+            "Phantom Limb Syndrome": { name_ar: "متلازمة الطرف الشبح", description_ar: "الإحساس بأن طرفاً مبتوراً أو مفقوداً لا يزال متصلاً بالجسم. غالباً ما يعاني المصابون من الألم أو الحكة أو الإحساس بالحركة في الطرف المفقود.", tags_ar: ["مبتور", "ذراع مفقودة", "ساق مفقودة", "طرف شبح", "ألم", "حكة", "جراحة"] },
+            "Tourette Syndrome": { name_ar: "متلازمة توريت", description_ar: "اضطراب في الجهاز العصبي يتضمن حركات متكررة أو أصواتاً غير مرغوب فيها (تشنجات لا إرادية) لا يمكن السيطرة عليها بسهولة.", tags_ar: ["تشنجات لاإرادية", "ارتعاش", "شتائم", "سب", "صوتي", "لا إرادي", "تشنج"] },
+            "Ehlers-Danlos Syndrome": { name_ar: "متلازمة إيلرز-دانلوس", description_ar: "مجموعة من الاضطرابات الوراثية التي تؤثر على الأنسجة الضامة، مما يؤدي إلى مرونة مفرطة في المفاصل وجلد مطاطي وهش.", tags_ar: ["مرن", "جلد مطاطي", "مفاصل مزدوجة", "كولاجين", "كدمات", "خلع", "نسيج ضام"] },
+            "Marfan Syndrome": { name_ar: "متلازمة مارفان", description_ar: "اضطراب وراثي يؤثر على النسيج الضام. عادة ما يكون الأشخاص المصابون طوال القامة ونحفاء مع أذرع وأرجل وأصابع طويلة بشكل غير متناسب.", tags_ar: ["طويل", "أصابع طويلة", "أصابع عنكبوتية", "قلب", "أورطي", "إبراهام لينكولن", "مرن"] },
+            "Synesthesia": { name_ar: "الحس المواكب", description_ar: "حالة عصبية تؤدي فيها المعلومات التي تهدف إلى تحفيز إحدى حواسك إلى تحفيز عدة حواس. قد 'يتذوق' الناس الكلمات أو 'يسمعون' الألوان.", tags_ar: ["سماع الألوان", "تذوق الكلمات", "حواس", "مختلط", "أرقام", "ألوان", "موسيقى", "إدراك"] },
+            "Guillain-Barré Syndrome": { name_ar: "متلازمة غيلان باريه", description_ar: "اضطراب نادر يهاجم فيه الجهاز المناعي أعصابك. الضعف والوخز في الأطراف هما عادة الأعراض الأولى، ويمكن أن ينتشرا بسرعة ويشلان جسمك بالكامل.", tags_ar: ["شلل", "ضعف", "وخز", "أعصاب", "جهاز مناعي", "عدوى", "مؤقت"] },
+            "Wernicke-Korsakoff Syndrome": { name_ar: "متلازمة فيرنيكي-كورساكوف", description_ar: "يُطلق عليها غالباً 'الدماغ الرطب'، وهي نوع من اضطرابات الدماغ الناتجة عن نقص فيتامين ب-1 (الثيامين)، ترتبط ارتباطاً وثيقاً بإدمان الكحول، مما يؤدي إلى فقدان شديد للذاكرة.", tags_ar: ["كحول", "شرب", "فقدان الذاكرة", "كذب", "دماغ رطب", "ثيامين"] },
+            "Horner's Syndrome": { name_ar: "متلازمة هورنر", description_ar: "مجموعة من العلامات والأعراض الناتجة عن تعطل مسار عصبي من الدماغ إلى الوجه والعين على جانب واحد من الجسم. يؤدي إلى تدلي الجفن، وانقباض الحدقة، وانخفاض التعرق.", tags_ar: ["عين", "تدلي الجفن", "حدقة", "عرق", "تلف الأعصاب", "وجه", "عدم تناسق"] },
+            "Ramsay Hunt Syndrome": { name_ar: "متلازمة رامزي هانت", description_ar: "تحدث عندما يؤثر تفشي الهربس النطاقي على العصب الوجهي بالقرب من إحدى أذنيك، مما يسبب شللاً في الوجه وفقداناً للسمع (أصاب جاستن بيبر الشهير).", tags_ar: ["هربس نطاقي", "شلل الوجه", "جاستن بيبر", "فيروس", "أذن", "فقدان السمع", "تدلي"] },
+            "Postural Orthostatic Tachycardia Syndrome (POTS)": { name_ar: "متلازمة تسارع معدل ضربات القلب الانتصابي", description_ar: "حالة تؤثر على تدفق الدم. تسبب زيادة سريعة في ضربات القلب ودواراً أو إغماءً عند الوقوف من وضع الاستلقاء.", tags_ar: ["دوار", "إغماء", "وقوف", "معدل ضربات القلب", "ضغط الدم", "تسرع القلب", "مرض مزمن"] },
+            "Cushing's Syndrome": { name_ar: "متلازمة كوشينغ", description_ar: "حالة تحدث من التعرض لمستويات عالية من الكورتيزول لفترة طويلة. يمكن أن يسبب زيادة الوزن، ووجهاً دائرياً 'على شكل قمر'، وحدبة دهنية بين الكتفين.", tags_ar: ["كورتيزول", "هرمون التوتر", "وجه القمر", "زيادة الوزن", "منشطات", "حدبة جاموس", "علامات تمدد أرجوانية"] },
+            "Addison's Disease": { name_ar: "مرض أديسون", description_ar: "يُسمى أيضاً قصور الغدة الكظرية، وهو اضطراب غير شائع يحدث عندما لا ينتج جسمك ما يكفي من هرمونات معينة (الكورتيزول والألدوستيرون).", tags_ar: ["إرهاق", "بشرة داكنة", "اسمرار", "هرمونات", "غدة كظرية", "فقدان الوزن", "جون كينيدي"] },
+            "Raynaud's Syndrome": { name_ar: "متلازمة رينو", description_ar: "حالة تسبب شعور بعض مناطق الجسم - مثل أصابع اليدين والقدمين - بالخدر والبرودة استجابة لدرجات الحرارة الباردة أو التوتر. تضيق الشرايين، مما يحول الأصابع إلى اللون الأبيض أو الأزرق.", tags_ar: ["برد", "أصابع بيضاء", "أصابع زرقاء", "تدفق الدم", "خدر", "شتاء", "توتر"] },
+            "Sjögren's Syndrome": { name_ar: "متلازمة شوغرن", description_ar: "اضطراب مناعي ذاتي يتم تحديده بشكل أساسي من خلال أكثر أعراضه شيوعاً: جفاف العينين وجفاف الفم، الناتج عن مهاجمة الجسم للغدد التي تفرز الدموع واللعاب.", tags_ar: ["جفاف العيون", "جفاف الفم", "دموع", "لعاب", "مناعة ذاتية", "عطشان", "غدد"] },
+            "Behçet's Syndrome": { name_ar: "متلازمة بهجت", description_ar: "اضطراب مزمن ونادر يسبب التهاب الأوعية الدموية في جميع أنحاء الجسم، مما يؤدي إلى تقرحات الفم والتهاب العين والطفح الجلدي.", tags_ar: ["تقرحات", "قرح", "التهاب", "أوعية دموية", "مناعة ذاتية", "طفح جلدي"] },
+            "Toxic Shock Syndrome": { name_ar: "متلازمة الصدمة التسممية", description_ar: "مضاعفات نادرة ومهددة للحياة لبعض أنواع العدوى البكتيرية، مرتبطة تاريخياً بالسدادات القطنية، وتسبب حمى مفاجئة وانخفاض ضغط الدم وطفحاً جلدياً.", tags_ar: ["سدادة قطنية", "بكتيريا", "حمى", "طفح جلدي", "عدوى", "انخفاض مفاجئ"] },
+            "Carpal Tunnel Syndrome": { name_ar: "متلازمة النفق الرسغي", description_ar: "ناجمة عن الضغط على العصب المتوسط في الرسغ، مما يؤدي إلى خدر ووخز وضعف في اليد والذراع. يرتبط غالباً بالحركات المتكررة مثل الكتابة.", tags_ar: ["كتابة", "رسغ", "يد", "خدر", "ألم", "عصب", "لوحة مفاتيح", "فأرة"] },
+            "Compartment Syndrome": { name_ar: "متلازمة الحيز", description_ar: "حالة مؤلمة وخطيرة ناتجة عن تراكم الضغط بسبب نزيف داخلي أو تورم في الأنسجة داخل حيز العضلات، مما يوقف تدفق الدم.", tags_ar: ["تورم", "ضغط", "عضلة", "نزيف", "صدمة", "ساق", "إصابة سحق", "جراحة"] },
+            "Sick Building Syndrome": { name_ar: "متلازمة المباني المريضة", description_ar: "حالة يعاني فيها شاغلو المبنى من آثار صحية حادة تبدو مرتبطة بالوقت الذي يقضونه في مبنى معين، غالباً بسبب سوء جودة الهواء.", tags_ar: ["مكتب", "عمل", "جودة الهواء", "عفن", "صداع", "تهوية", "مريض في العمل"] },
+            "Empty Sella Syndrome": { name_ar: "متلازمة السرج الخالي", description_ar: "حالة نادرة تتقلص فيها الغدة النخامية أو تتسطح، مما يجعل السرج التركي (الهيكل العظمي الذي يأويها) يبدو فارغاً في التصوير بالرنين المغناطيسي.", tags_ar: ["نخامية", "دماغ", "رنين مغناطيسي", "هرمونات", "صداع", "هيكل عظمي"] },
+            "Superior Canal Dehiscence Syndrome": { name_ar: "متلازمة تفزر القناة العلوية", description_ar: "حالة نادرة في الأذن الداخلية حيث يتسبب ثقب في العظم المغطي للأذن الداخلية في سماع الأفراد لأصوات الجسم الداخلية بصوت عالٍ بشكل غير طبيعي.", tags_ar: ["سمع", "أذن", "نبض القلب", "حركة العيون", "خطوات", "عالي", "أصوات داخلية", "دوار"] },
+            "Mallory-Weiss Syndrome": { name_ar: "متلازمة مالوري فايس", description_ar: "حالة تتميز بنزيف من تمزقات في الغشاء المخاطي عند تقاطع المعدة والمريء، وتحدث عادة بسبب التهوع الشديد أو السعال أو القيء.", tags_ar: ["قيء", "استفراغ", "نزيف", "معدة", "مريء", "كحول", "تمزق"] },
+            "Zollinger-Ellison Syndrome": { name_ar: "متلازمة زولينجر إليسون", description_ar: "حالة نادرة يتشكل فيها ورم أو أكثر في البنكرياس أو الجزء العلوي من الأمعاء الدقيقة، مما يفرز هرموناً يؤدي إلى زيادة أحماض المعدة والقرحة.", tags_ar: ["حمض المعدة", "قرحة", "ورم", "بنكرياس", "حموضة", "غاسترين", "هضم"] },
+            "Budd-Chiari Syndrome": { name_ar: "متلازمة باد-كياري", description_ar: "حالة نادرة جداً ناتجة عن انسداد الأوردة الكبدية التي تستنزف الكبد، مما يؤدي إلى آلام في البطن، واستسقاء (سوائل في البطن)، وتضخم الكبد.", tags_ar: ["كبد", "جلطة دموية", "بطن", "تورم", "أوردة", "يرقان", "ألم"] },
+            "Brugada Syndrome": { name_ar: "متلازمة بروجادا", description_ar: "اضطراب وراثي نادر يسبب عدم انتظام ضربات القلب في الحجرات السفلية للقلب، مما قد يؤدي إلى سكتة قلبية مفاجئة، خاصة أثناء النوم.", tags_ar: ["ضربات القلب", "موت مفاجئ", "نوم", "سكتة قلبية", "عدم انتظام ضربات القلب", "إغماء"] },
+            "Wolff-Parkinson-White Syndrome": { name_ar: "متلازمة وولف-باركنسون-وايت", description_ar: "حالة يوجد فيها مسار كهربائي إضافي في القلب. يمكن أن تؤدي الحالة إلى فترات من سرعة معدل ضربات القلب (عدم انتظام دقات القلب).", tags_ar: ["معدل ضربات القلب", "سريع", "كهربائي", "خفقان", "مسار إضافي", "تسرع القلب"] },
+            "Reye's Syndrome": { name_ar: "متلازمة راي", description_ar: "حالة نادرة ولكنها خطيرة تسبب تورماً في الكبد والدماغ، وغالباً ما تصيب الأطفال والمراهقين الذين يتعافون من عدوى فيروسية، وترتبط أحياناً باستخدام الأسبرين.", tags_ar: ["أسبرين", "أطفال", "كبد", "تورم الدماغ", "فيروسي", "حمى", "ارتباك"] },
+            "Havana Syndrome": { name_ar: "متلازمة هافانا", description_ar: "مجموعة من العلامات والأعراض الطبية أبلغ عنها موظفو السفارات الأمريكية والكندية في كوبا لأول مرة، وسببها الدقيق مثير للجدل وغير معروف.", tags_ar: ["كوبا", "سفارة", "جواسيس", "طنين الأذن", "صداع", "ميكروويف", "صوتي", "غموض"] },
+            "Proteus Syndrome": { name_ar: "متلازمة بروتيوس", description_ar: "حالة نادرة تتميز بفرط نمو العظام والجلد والأنسجة الأخرى. تنمو الأعضاء بشكل غير متناسب مع بقية الجسم (أصابت جوزيف ميريك، 'الرجل الفيل').", tags_ar: ["فرط النمو", "عظام", "الرجل الفيل", "أورام", "عدم تناسق", "جوزيف ميريك", "جلد"] },
+            "Progeria (Hutchinson-Gilford Syndrome)": { name_ar: "الشياخ (متلازمة هتشينسون-جيلفورد)", description_ar: "اضطراب وراثي تقدمي نادر جداً يتسبب في شيخوخة الأطفال بسرعة، بدءاً من أول عامين من حياتهم، مما يؤدي إلى تساقط الشعر وشيخوخة الجلد وأمراض القلب.", tags_ar: ["شيخوخة", "طفل عجوز", "تجاعيد", "شيخوخة مبكرة", "تساقط الشعر", "بنجامين باتون", "قاتل"] },
+            "Treacher Collins Syndrome": { name_ar: "متلازمة تريتشر كولينز", description_ar: "اضطراب وراثي يتميز بتشوهات في الأذنين والعينين وعظام الخد والذقن. تختلف درجة الإصابة من خفيفة إلى شديدة.", tags_ar: ["وجه", "عظام الخد", "فك", "فيلم وندر", "تشوه", "فقدان السمع", "جراحة"] },
+            "Cri-du-chat Syndrome": { name_ar: "متلازمة مواء القطط", description_ar: "حالة كروموسومية تنتج عن فقدان جزء من الكروموسوم 5. غالباً ما يبكي الرضع المصابون بهذه الحالة بصوت عالي النبرة يشبه صوت القطة.", tags_ar: ["بكاء القط", "طفل", "كروموسومات", "إعاقة ذهنية", "مواء", "رضيع"] },
+            "Waardenburg Syndrome": { name_ar: "متلازمة واردينبيرغ", description_ar: "مجموعة من الحالات الوراثية التي يمكن أن تسبب فقدان السمع وتغيرات في لون الشعر والجلد والعينين. غالباً ما يكون لديهم عيون زرقاء شاحبة جداً أو خصلة شعر بيضاء.", tags_ar: ["شعر أبيض", "عيون زرقاء", "صمم", "صبغة", "عيون مختلفة", "تغاير التلون", "خصلة"] },
+            "Usher Syndrome": { name_ar: "متلازمة آشر", description_ar: "الحالة الأكثر شيوعاً التي تؤثر على كل من السمع والرؤية. مرض وراثي يسبب فقداناً كبيراً للسمع واضطراباً في العين يسمى التهاب الشبكية الصباغي.", tags_ar: ["أصم وأعمى", "عمى", "صمم", "فقدان الرؤية", "فقدان السمع", "التهاب الشبكية", "رؤية نفقية"] },
+            "Rett Syndrome": { name_ar: "متلازمة ريت", description_ar: "اضطراب عصبي ونمائي وراثي نادر يؤثر على طريقة تطور الدماغ، مما يسبب فقداناً تدريجياً للمهارات الحركية والكلام، ويؤثر بشكل أساسي على الإناث.", tags_ar: ["فتيات", "فقدان الكلام", "عصر اليدين", "نمائي", "تراجع", "مهارات حركية"] },
+            "Fragile X Syndrome": { name_ar: "متلازمة الكروموسوم إكس الهش", description_ar: "اضطراب وراثي يسبب مجموعة من المشاكل النمائية بما في ذلك صعوبات التعلم والضعف الإدراكي. هو السبب الوراثي الأكثر شيوعاً للإعاقة الذهنية لدى الذكور.", tags_ar: ["إعاقة ذهنية", "أولاد", "يشبه التوحد", "تعلم", "وراثة", "كروموسوم"] },
+            "Turner Syndrome": { name_ar: "متلازمة تيرنر", description_ar: "حالة تؤثر فقط على الإناث، وتنتج عن فقدان أحد كروموسومات X كلياً أو جزئياً. يمكن أن يسبب قصر القامة وتأخر البلوغ وعيوباً في القلب.", tags_ar: ["إناث", "قصير", "عقم", "كروموسوم إكس", "بلوغ", "عنق وتري"] },
+            "Klinefelter Syndrome": { name_ar: "متلازمة كلاينفلتر", description_ar: "حالة وراثية يولد فيها الذكر بنسخة إضافية من كروموسوم X (XXY). يمكن أن يسبب انخفاض إنتاج هرمون التستوستيرون وانخفاض كتلة العضلات وتضخم أنسجة الثدي.", tags_ar: ["ذكور", "كروموسوم إضافي", "تستوستيرون", "عقم", "طويل", "XXY"] },
+            "Patau Syndrome (Trisomy 13)": { name_ar: "متلازمة باتو (تثلث الصبغي 13)", description_ar: "حالة وراثية نادرة وخطيرة ناجمة عن وجود نسخة إضافية من الكروموسوم 13، مما يسبب إعاقة ذهنية شديدة وتشوهات جسدية.", tags_ar: ["تثلث الصبغي 13", "شفة مشقوقة", "أصابع إضافية", "تعدد الأصابع", "شديد", "كروموسوم", "رضيع"] },
+            "Edwards Syndrome (Trisomy 18)": { name_ar: "متلازمة إدواردز (تثلث الصبغي 18)", description_ar: "حالة وراثية نادرة وخطيرة ناجمة عن نسخة إضافية من الكروموسوم 18. يسبب تأخراً شديداً في النمو وتشوهات جسدية، وغالباً ما يهدد الحياة في مرحلة الطفولة المبكرة.", tags_ar: ["تثلث الصبغي 18", "أيدي مقبوضة", "شديد", "عيوب القلب", "كروموسوم", "رضيع"] },
+            "Down Syndrome (Trisomy 21)": { name_ar: "متلازمة داون (تثلث الصبغي 21)", description_ar: "اضطراب وراثي ناتج عن انقسام غير طبيعي للخلايا يؤدي إلى نسخة إضافية كاملة أو جزئية من الكروموسوم 21، مما يسبب تغيرات في النمو وملامح جسدية مميزة.", tags_ar: ["تثلث الصبغي 21", "إعاقة ذهنية", "ملامح الوجه", "شائع", "كروموسوم", "نمائي"] },
+            "Brown-Séquard Syndrome": { name_ar: "متلازمة براون-سيكوارد", description_ar: "حالة عصبية نادرة تتميز بآفة في الحبل الشوكي تؤدي إلى ضعف أو شلل في جانب واحد من الجسم وفقدان الإحساس في الجانب الآخر.", tags_ar: ["حبل شوكي", "شلل", "نصف الجسم", "فقدان الإحساس", "إصابة", "صدمة", "آفة"] },
+            "Goodpasture Syndrome": { name_ar: "متلازمة غودباستشر", description_ar: "مرض مناعي ذاتي نادر يهدد الحياة حيث تهاجم الأجسام المضادة الغشاء القاعدي في الرئتين والكلى، مما يؤدي إلى نزيف من الرئتين وفشل كلوي.", tags_ar: ["رئتين", "كلى", "سعال الدم", "مناعة ذاتية", "فشل كلوي", "نزيف"] },
+            "Sanfilippo Syndrome": { name_ar: "متلازمة سانفيليبو", description_ar: "تسمى أحياناً بمرض الزهايمر في مرحلة الطفولة، وهي اضطراب استقلابي وراثي نادر يسبب تلفاً شديداً في الجهاز العصبي المركزي، مما يؤدي إلى فقدان الكلام والتدهور المعرفي والوفاة المبكرة.", tags_ar: ["زهايمر الطفولة", "استقلاب", "خرف", "فقدان المهارات", "قاتل", "تلف الدماغ"] },
+            "Morquio Syndrome": { name_ar: "متلازمة موركيو", description_ar: "حالة وراثية نادرة يفتقر فيها الجسم إلى الإنزيمات اللازمة لتكسير سلاسل السكر، مما يسبب نمواً غير طبيعي للعظام، وقصر القامة، ومشاكل في القلب/الرئتين.", tags_ar: ["تقزم", "عظام", "إنزيمات", "سلاسل سكر", "عمود فقري", "قصر القامة"] },
+            "Crouzon Syndrome": { name_ar: "متلازمة كروزون", description_ar: "اضطراب وراثي يتميز بالتحام مبكر لبعض عظام الجمجمة. هذا يمنع الجمجمة من النمو بشكل طبيعي ويؤثر على شكل الرأس والوجه.", tags_ar: ["جمجمة", "شكل الوجه", "جحوظ العينين", "تعظم الدروز الباكر", "عظام", "جراحة"] },
+            "Apert Syndrome": { name_ar: "متلازمة أبير", description_ar: "اضطراب وراثي يسبب نمواً غير طبيعي للجمجمة، مما يؤدي إلى تشوه في الوجه وشكل الرأس، وارتفاق الأصابع (أصابع اليدين والقدمين المكففة أو المندمجة).", tags_ar: ["أصابع مكففة", "أصابع مندمجة", "جمجمة", "شكل الوجه", "تعظم الدروز الباكر", "ارتفاق الأصابع"] },
+            "Noonan Syndrome": { name_ar: "متلازمة نونان", description_ar: "اضطراب وراثي يمنع التطور الطبيعي في أجزاء مختلفة من الجسم. يمكن أن يشمل خصائص الوجه غير العادية، وقصر القامة، وعيوب القلب.", tags_ar: ["عيوب القلب", "قصير", "ملامح الوجه", "شكل الصدر", "نمائي", "عنق وتري"] },
+            "Todd's Paralysis": { name_ar: "شلل تود", description_ar: "حالة عصبية يعاني منها المصابون بالصرع، حيث تتبع النوبة فترة قصيرة من الشلل المؤقت. قد يكون الشلل جزئياً أو كاملاً.", tags_ar: ["نوبة", "صرع", "شلل", "مؤقت", "ضعف", "ما بعد النوبة"] },
+            "Tietze Syndrome": { name_ar: "متلازمة تيتز", description_ar: "اضطراب التهابي نادر يتميز بألم في الصدر وتورم في الغضروف الذي يربط الأضلاع العلوية بعظمة الصدر. يحاكي النوبة القلبية.", tags_ar: ["ألم الصدر", "أضلاع", "غضروف", "تورم", "تقليد نوبة قلبية", "التهاب"] },
+            "Stevens-Johnson Syndrome": { name_ar: "متلازمة ستيفنز جونسون", description_ar: "اضطراب نادر وخطير يصيب الجلد والأغشية المخاطية. عادة ما يكون رد فعل تجاه دواء يبدأ بأعراض تشبه أعراض الإنفلونزا، يليه طفح جلدي مؤلم ينتشر وتظهر بثور.", tags_ar: ["طفح جلدي", "بثور", "رد فعل دوائي", "تقشر الجلد", "حساسية", "وحدة الحروق", "أغشية مخاطية"] },
+            "Angelman Syndrome": { name_ar: "متلازمة أنجلمان", description_ar: "اضطراب وراثي يسبب تأخراً في النمو ومشاكل في الكلام والتوازن وإعاقة ذهنية وأحياناً نوبات. غالباً ما يبتسم ويضحك المصابون بهذه المتلازمة كثيراً.", tags_ar: ["سعيد", "مبتسم", "يضحك", "دمية", "نمائي", "تأخر الكلام", "نوبات"] },
+            "Prader-Willi Syndrome": { name_ar: "متلازمة برادر-ويلي", description_ar: "اضطراب وراثي نادر يسبب إحساساً مستمراً بالجوع يبدأ عادة في سن عامين تقريباً. يرغب المصابون في تناول الطعام باستمرار لأنهم لا يشعرون بالشبع أبداً.", tags_ar: ["جوع", "أكل", "لا يشبع أبدًا", "سمنة", "البحث عن طعام", "كروموسوم 15", "يتضور جوعا"] },
+            "Erotomania (De Clérambault's Syndrome)": { name_ar: "هوس العشق (متلازمة دي كليرامبو)", description_ar: "اضطراب توهمي نادر يعتقد فيه الشخص بشدة أن فرداً آخر (غالباً ما يكون من المشاهير أو شخصاً ذا مكانة اجتماعية أعلى) يقع في حبه سراً.", tags_ar: ["مطارد", "مشهور", "حب سري", "وهم", "رومانسية", "حب من طرف واحد", "هوس"] },
+            "Möbius Syndrome": { name_ar: "متلازمة موبيوس", description_ar: "اضطراب عصبي خلقي نادر يتميز بشلل الوجه وعدم القدرة على تحريك العينين من جانب إلى آخر. لا يستطيع المصابون الابتسام أو العبوس أو الرمش.", tags_ar: ["بدون تعبير", "لا يستطيع الابتسام", "شلل الوجه", "عيون", "تحديق", "أعصاب قحفية"] },
+            "Gerstmann Syndrome": { name_ar: "متلازمة جيرستمان", description_ar: "ضعف إدراكي ناتج عن تلف في منطقة معينة من الدماغ. يتميز بأربعة أعراض رئيسية: عدم القدرة على الكتابة، عدم القدرة على القيام بالرياضيات، عدم القدرة على التعرف على الأصابع، وارتباك بين اليمين واليسار.", tags_ar: ["رياضيات", "كتابة", "أصابع", "يمين يسار", "ارتباك", "تلف الدماغ", "سكتة دماغية", "عسر الكتابة"] }
+        };
+
+        // Create the final robust database with Arabic injection mapping
+        const finalDatabase = syndromesDatabase.map(s => {
+            return {
+                ...s,
+                name_ar: preciseAr[s.name]?.name_ar || `متلازمة ${s.name.replace(' Syndrome', '').replace(' Disease', '')}`, 
+                category_ar: catTranslations[s.category] || s.category,
+                description_ar: preciseAr[s.name]?.description_ar || s.description,
+                tags_ar: preciseAr[s.name]?.tags_ar || s.tags 
+            };
+        });
+
+        const DOM = {
+            searchInput: document.getElementById('searchInput'),
+            clearBtn: document.getElementById('clearSearch'),
+            filterContainer: document.getElementById('filterContainer'),
+            grid: document.getElementById('syndromeGrid'),
+            resultsCount: document.getElementById('resultsCount'),
+            emptyState: document.getElementById('emptyState')
+        };
+
+        // Custom scoring algorithm to handle contextual/semantic-like searches
+        function calculateScore(syndrome, query) {
+            if (!query) return 1; // Default score if no query
+            
+            const q = query.toLowerCase().trim();
+            const words = q.split(/\s+/);
+            let score = 0;
+
+            const name = (state.lang === 'ar' ? syndrome.name_ar : syndrome.name).toLowerCase();
+            const desc = (state.lang === 'ar' ? syndrome.description_ar : syndrome.description).toLowerCase();
+            const tags = (state.lang === 'ar' && syndrome.tags_ar ? syndrome.tags_ar : syndrome.tags).join(" ").toLowerCase();
+
+            // 1. Exact phrase matches (High Priority)
+            if (name === q) score += 100;
+            if (name.includes(q)) score += 40;
+            
+            // If the user's exact query phrase is found in tags (e.g. "bad guy")
+            if ((state.lang === 'ar' && syndrome.tags_ar ? syndrome.tags_ar : syndrome.tags).some(tag => tag.toLowerCase() === q)) score += 50;
+            if (tags.includes(q)) score += 30;
+            
+            if (desc.includes(q)) score += 15;
+
+            // 2. Individual word matches (To catch variations and partial context)
+            words.forEach(word => {
+                if (word.length < 3) return; // Skip small words like 'a', 'in', 'of'
+                
+                if (name.includes(word)) score += 10;
+                if (tags.includes(word)) score += 8;
+                if (desc.includes(word)) score += 3;
+            });
+
+            return score;
+        }
+
+        function getFilteredSyndromes() {
+            let results = finalDatabase;
+
+            // Filter by Category
+            if (state.activeCategory !== "All") {
+                results = results.filter(s => s.category === state.activeCategory);
+            }
+
+            // Search by Query
+            if (state.query) {
+                // Score, filter, and sort
+                results = results
+                    .map(s => ({ ...s, score: calculateScore(s, state.query) }))
+                    .filter(s => s.score > 0)
+                    .sort((a, b) => b.score - a.score); // Highest score first
+            } else {
+                // Alphabetical if no search query
+                results = results.sort((a, b) => {
+                    const nameA = state.lang === 'ar' ? a.name_ar : a.name;
+                    const nameB = state.lang === 'ar' ? b.name_ar : b.name;
+                    return nameA.localeCompare(nameB, state.lang === 'ar' ? 'ar' : 'en');
+                });
+            }
+
+            return results;
+        }
+
+        function renderFilters() {
+            const displayCategories = state.lang === 'ar' 
+                ? categories.map(cat => catTranslations[cat] || cat) 
+                : categories;
+
+            DOM.filterContainer.innerHTML = displayCategories.map((displayCat, index) => {
+                const originalCat = categories[index];
+                const isActive = state.activeCategory === originalCat;
+                
+                const baseClasses = "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors cursor-pointer border";
+                const activeClasses = "bg-brand-500 text-white border-brand-500 shadow-md";
+                const inactiveClasses = "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700";
+                
+                return `
+                    <button 
+                        onclick="setCategory('${originalCat}')" 
+                        class="${baseClasses} ${isActive ? activeClasses : inactiveClasses}"
+                    >
+                        ${displayCat}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function getDarkClasses(colorString) {
+            return colorString.split(' ').map(cls => {
+                if(cls.startsWith('bg-')) return cls + ' dark:bg-' + cls.split('-')[1] + '-900/30';
+                if(cls.startsWith('text-')) return cls + ' dark:text-' + cls.split('-')[1] + '-300';
+                if(cls.startsWith('border-')) return cls + ' dark:border-' + cls.split('-')[1] + '-800/50';
+                return cls;
+            }).join(' ');
+        }
+
+        function renderGrid(data) {
+            if (data.length === 0) {
+                DOM.grid.classList.add('hidden');
+                DOM.emptyState.classList.remove('hidden');
+                DOM.resultsCount.textContent = state.lang === 'ar' ? '0 متلازمة وجدت' : `0 results found`;
+                return;
+            }
+
+            DOM.grid.classList.remove('hidden');
+            DOM.emptyState.classList.add('hidden');
+            
+            DOM.resultsCount.innerHTML = uiText[state.lang].resultsCount(data.length);
+
+            DOM.grid.innerHTML = data.map(s => {
+                const name = state.lang === 'ar' ? s.name_ar : s.name;
+                const desc = state.lang === 'ar' ? s.description_ar : s.description;
+                const cat = state.lang === 'ar' ? s.category_ar : s.category;
+                const tags = state.lang === 'ar' && s.tags_ar ? s.tags_ar : s.tags;
+                const colorClasses = getDarkClasses(s.color);
+                
+                // Dynamically generate Wikipedia Search URL based on language and syndrome name
+                const wikiLang = state.lang === 'ar' ? 'ar' : 'en';
+                const wikiUrl = `https://${wikiLang}.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(name)}`;
+
+                return `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm card-hover flex flex-col h-full relative overflow-hidden group transition-colors duration-200">
+                    <div class="absolute top-0 ${state.lang === 'ar' ? 'right-0' : 'left-0'} w-1 h-full ${s.color.split(' ')[0]} dark:opacity-50"></div>
+                    <div class="flex justify-between items-start mb-4 gap-3">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-white ${state.lang === 'ar' ? 'pl-2' : 'pr-2'} leading-tight">${name}</h3>
+                        <a href="${wikiUrl}" target="_blank" rel="noopener noreferrer" class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 dark:bg-slate-700/50 text-slate-400 dark:text-slate-400 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/50 dark:hover:text-brand-400 transition-colors" title="${uiText[state.lang].wikiLink}">
+                            <i class="fa-brands fa-wikipedia-w"></i>
+                        </a>
+                    </div>
+                    <div class="mb-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${colorClasses} border">
+                            ${cat}
+                        </span>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-300 flex-grow leading-relaxed text-sm sm:text-base">
+                        ${highlightText(desc, state.query)}
+                    </p>
+                    
+                    ${state.query && s.score ? `
+                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium mb-2"><i class="fa-solid fa-bullseye text-brand-400 mr-1"></i> ${uiText[state.lang].matchContext}</p>
+                        <div class="flex flex-wrap gap-1">
+                            ${tags.slice(0, 5).map(t => 
+                                `<span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-2 py-1 rounded uppercase tracking-wide border border-slate-200 dark:border-slate-600">${t}</span>`
+                            ).join('')}
+                            ${tags.length > 5 ? `<span class="text-[10px] text-slate-400 dark:text-slate-500 px-1 py-1">...</span>` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+                `;
+            }).join('');
+        }
+
+        // Helper to visually highlight search terms in the description
+        function highlightText(text, query) {
+            if (!query) return text;
+            
+            // Basic highlighting for individual words > 2 chars
+            const words = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+            if (words.length === 0) return text;
+
+            let highlighted = text;
+            words.forEach(word => {
+                // Use regex to highlight while preserving original case
+                const regex = new RegExp(`(${word})`, 'gi');
+                highlighted = highlighted.replace(regex, '<mark class="bg-yellow-200 text-yellow-900 rounded px-0.5">$1</mark>');
+            });
+            return highlighted;
+        }
+
+        function setCategory(cat) {
+            state.activeCategory = cat;
+            renderFilters();
+            updateView();
+        }
+
+        function clearSearch() {
+            DOM.searchInput.value = '';
+            state.query = '';
+            DOM.clearBtn.classList.add('hidden');
+            updateView();
+        }
+
+        function updateView() {
+            const results = getFilteredSyndromes();
+            renderGrid(results);
+        }
+
+        DOM.searchInput.addEventListener('input', (e) => {
+            state.query = e.target.value;
+            
+            if (state.query.trim().length > 0) {
+                DOM.clearBtn.classList.remove('hidden');
+            } else {
+                DOM.clearBtn.classList.add('hidden');
+            }
+            
+            updateView();
+        });
+
+        DOM.clearBtn.addEventListener('click', clearSearch);
+
+        function toggleTheme() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            document.documentElement.classList.toggle('dark', state.theme === 'dark');
+        }
+
+        function toggleLanguage() {
+            state.lang = state.lang === 'en' ? 'ar' : 'en';
+            document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = state.lang;
+            
+            // Update static UI text
+            document.getElementById('ui-title').innerHTML = uiText[state.lang].title;
+            document.getElementById('ui-subtitle').textContent = uiText[state.lang].subtitle;
+            DOM.searchInput.placeholder = uiText[state.lang].searchPlaceholder;
+            document.getElementById('ui-empty-title').textContent = uiText[state.lang].emptyTitle;
+            document.getElementById('ui-empty-desc').textContent = uiText[state.lang].emptyDesc;
+            document.getElementById('ui-clear-btn').textContent = uiText[state.lang].clearBtn;
+            document.getElementById('ui-footer').textContent = uiText[state.lang].footer;
+            document.getElementById('ui-lang-btn').textContent = uiText[state.lang].langBtn;
+            
+            // Re-render dynamic lists
+            renderFilters();
+            updateView();
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            renderFilters();
+            updateView();
+        });
+
+    </script>
+</body>
+</html>
